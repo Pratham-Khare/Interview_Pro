@@ -1,16 +1,123 @@
-# React + Vite
+# InterviewPro - AI Interview Preparation Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+InterviewPro is a full-stack web application designed to help users prepare for technical and professional interviews using AI. It allows users to upload resumes, generate relevant interview questions, and access premium features through a subscription-based system.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+### AI-Based Question Generation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+* Generates interview questions from resume content or custom user input
+* Produces role-specific and targeted questions for better preparation
+* Automates question discovery, reducing manual effort
 
-## Expanding the ESLint configuration
+### User Authentication
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+* Secure login and registration using JWT-based authentication
+* Passwords are encrypted using bcrypt before storage
+* Protected routes to restrict unauthorized access
+
+### Subscription System
+
+* Integrated payment flow using Razorpay
+* Enables controlled access to premium features
+* Includes secure payment verification handling
+
+### Resume Upload & Processing
+
+* Supports PDF resume uploads
+* Extracts and processes text content from resumes
+* Uses extracted data to generate personalized interview questions
+
+---
+
+## Setup Instructions
+
+### Prerequisites
+
+* Node.js installed
+* MongoDB database (local or MongoDB Atlas)
+
+---
+
+### 1. Environment Variables Configuration
+
+Create a `.env` file inside the `Backend` folder:
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
+```
+
+---
+
+### 2. Install Dependencies
+
+**Backend**
+
+```bash
+cd Backend
+npm install
+```
+
+**Frontend**
+
+```bash
+cd Frontend
+npm install
+```
+
+---
+
+### 3. Run the Application
+
+**Start Backend**
+
+```bash
+cd Backend
+npm run dev
+```
+
+(Server runs on `http://localhost:5000`)
+
+**Start Frontend**
+
+```bash
+cd Frontend
+npm run dev
+```
+
+(Client runs on Vite default port, typically `http://localhost:5173`)
+
+---
+
+## Project Structure
+
+```
+interview-pro/
+├── Backend/
+├── Frontend/
+```
+
+---
+
+## Notes
+
+* Ensure all environment variables are correctly configured before running the project
+* Razorpay keys are required for subscription functionality
+* Cloudinary credentials are required for file upload handling
+
+---
+
+## License
+
+This project is intended for educational and demonstration purposes.
