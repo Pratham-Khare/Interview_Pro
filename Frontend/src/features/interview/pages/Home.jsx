@@ -4,6 +4,7 @@ import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
 import UserNavbar from "../../auth/components/UserNavbar"
 import UpgradePopup from "../../subscription/components/UpgradePopup"
+import toast, { Toaster } from 'react-hot-toast'
 
 const Home = () => {
 
@@ -11,15 +12,54 @@ const Home = () => {
     const [jobDescription, setJobDescription] = useState("")
     const [selfDescription, setSelfDescription] = useState("")
     const [showUpgradePopup, setShowUpgradePopup] = useState(false)
+    const [fileName, setFileName] = useState("") 
     const resumeInputRef = useRef()
 
     const navigate = useNavigate()
 
     const handleGenerateReport = async () => {
 
+        if (!jobDescription.trim()) {
+            toast.error("Job description is required!", {
+                duration: 4000,
+                position: 'top-center',
+                style: { 
+                    background: '#1a0a2e', 
+                    color: '#fff', 
+                    border: '1px solid #ff4b4b',
+                    borderRadius: '10px',
+                    padding: '16px',
+                },
+                iconTheme: {
+                    primary: '#ff4b4b',
+                    secondary: '#fff',
+                },
+            });
+            return;
+        }
+
         try {
 
             const resumeFile = resumeInputRef.current.files[0]
+
+            if (!resumeFile) {
+                toast.error("Please upload your resume first!", {
+                    duration: 4000,
+                    position: 'top-center',
+                    style: { 
+                        background: '#1a0a2e', 
+                        color: '#fff', 
+                        border: '1px solid #ff4b4b',
+                        borderRadius: '10px',
+                        padding: '16px',
+                    },
+                    iconTheme: {
+                        primary: '#ff4b4b',
+                        secondary: '#fff',
+                    },
+                });
+                return;
+            }
 
             const data = await generateReport({
                 jobDescription,
@@ -27,16 +67,58 @@ const Home = () => {
                 resumeFile
             })
 
-            navigate(`/interview/${data._id}`)
-
-        } catch (error) {
-
-            if (error.message === "NO_TOKENS") {
-                setShowUpgradePopup(true)
+            if (data?._id) {
+                navigate(`/interview/${data._id}`)
             }
 
-        }
+        } catch (error) {
+            // Updated logic to handle the 403 Forbidden / NO_TOKENS error[cite: 10, 11]
+            if (error.message === "NO_TOKENS") {
+                setShowUpgradePopup(true); // Open the popup[cite: 10]
+                
+                toast.error("You have run out of tokens!", {
+                    duration: 3000,
+                    position: 'top-center',
+                    style: { 
+                        background: '#1a0a2e', 
+                        color: '#fff', 
+                        border: '1px solid #a855f7',
+                        borderRadius: '10px',
+                        padding: '16px',
+                    },
+                });
 
+                // REDIRECTION: Allow 2 seconds for the popup/toast to be visible[cite: 10]
+                setTimeout(() => {
+                    navigate("/subscription");
+                }, 2000); 
+            } else {
+                toast.error("Failed to generate strategy. Please try again.");
+            }
+        }
+    }
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setFileName(file.name); // Updates the UI with the file name[cite: 10]
+            
+            toast.success(`Resume uploaded successfully!`, {
+                duration: 4000,
+                position: 'top-center',
+                style: { 
+                    background: '#1a0a2e', 
+                    color: '#fff', 
+                    border: '1px solid #22c55e', 
+                    borderRadius: '10px',
+                    padding: '16px',
+                },
+                iconTheme: {
+                    primary: '#22c55e',
+                    secondary: '#fff',
+                },
+            });
+        }
     }
 
     if (loading) {
@@ -49,10 +131,11 @@ const Home = () => {
 
     return (
         <div className='home-page'>
+            <Toaster position="top-center" reverseOrder={false} />
+            
             <UserNavbar />
             <div className='home-container'>
 
-                {/* Hero Section */}
                 <section className='hero-section'>
                     <div className='hero-badge'>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -69,10 +152,8 @@ const Home = () => {
                     </p>
                 </section>
 
-                {/* Main Form Grid */}
                 <div className='form-grid'>
 
-                    {/* Left Panel - Job Description */}
                     <div className='form-card form-card--left'>
                         <div className='form-card__header'>
                             <div className='form-card__icon'>
@@ -89,14 +170,14 @@ const Home = () => {
                                 className='form-textarea'
                                 placeholder='Paste the full job description here. Include responsibilities, requirements, and company info for better accuracy...'
                                 maxLength={5000}
+                                value={jobDescription}
                             />
                             <div className='form-footer'>
-                                <span className='form-footer__text'>Powered by GPT-4o</span>
+                                <span className='form-footer__text'>Made By Pratham Khare</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Right Panel - Profile */}
                     <div className='form-card form-card--right'>
                         <div className='form-card__header'>
                             <div className='form-card__icon'>
@@ -109,24 +190,46 @@ const Home = () => {
                         </div>
                         <div className='form-card__body'>
 
-                            {/* Upload Resume Section */}
                             <div className='upload-wrapper'>
                                 <label className='upload-label'>Upload Resume</label>
                                 <label className='dropzone' htmlFor='resume'>
                                     <div className='dropzone__content'>
-                                        <div className='dropzone__icon'>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M12 2v13M8 11l4-4 4 4" />
-                                            </svg>
-                                        </div>
-                                        <p className='dropzone__title'>Drop your resume here</p>
-                                        <p className='dropzone__subtitle'>PDF, DOCX up to 10MB</p>
+                                        {fileName ? (
+                                            <>
+                                                <div className='dropzone__icon'>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                        <polyline points="14 2 14 8 20 8" />
+                                                        <line x1="16" y1="13" x2="8" y2="13" />
+                                                    </svg>
+                                                </div>
+                                                <p className='dropzone__title' style={{ color: '#a855f7' }}>{fileName}</p>
+                                                <p className='dropzone__subtitle'>Click to change file</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className='dropzone__icon'>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M12 2v13M8 11l4-4 4 4" />
+                                                    </svg>
+                                                </div>
+                                                <p className='dropzone__title'>Drop your resume here</p>
+                                                <p className='dropzone__subtitle'>PDF, DOCX up to 10MB</p>
+                                            </>
+                                        )}
                                     </div>
-                                    <input ref={resumeInputRef} hidden type='file' id='resume' name='resume' accept='.pdf,.docx' />
+                                    <input 
+                                        ref={resumeInputRef} 
+                                        hidden 
+                                        type='file' 
+                                        id='resume' 
+                                        name='resume' 
+                                        accept='.pdf,.docx' 
+                                        onChange={handleFileChange} 
+                                    />
                                 </label>
                             </div>
 
-                            {/* Self Description Section */}
                             <div className='self-desc-wrapper'>
                                 <label className='upload-label' htmlFor='selfDescription'>Quick Self-Description</label>
                                 <textarea
@@ -141,7 +244,6 @@ const Home = () => {
                     </div>
                 </div>
 
-                {/* Generate Button */}
                 <div className='cta-section'>
                     <button
                         onClick={handleGenerateReport}
@@ -154,7 +256,6 @@ const Home = () => {
                     <p className='cta-note'>Takes about 30 seconds to analyze. You can preview the plan before saving.</p>
                 </div>
 
-                {/* Recent Reports List */}
                 {reports.length > 0 && (
                     <section className='recent-section'>
                         <div className='recent-header'>
@@ -203,7 +304,6 @@ const Home = () => {
                     </section>
                 )}
 
-                {/* Footer */}
                 <footer className='page-footer'>
                     <div className='footer-brand'>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -217,7 +317,7 @@ const Home = () => {
                         <a href='#'>Help Center</a>
                     </div>
                     <div className='footer-copyright'>
-                        © 2024 InterviewPro. All rights reserved. Built with precision for top-tier candidates.
+                        © 2024 InterviewPro. All rights reserved.
                     </div>
                 </footer>
 

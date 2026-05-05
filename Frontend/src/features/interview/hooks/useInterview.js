@@ -3,7 +3,6 @@ import { useContext, useEffect } from "react"
 import { InterviewContext } from "../interview.context"
 import { useParams } from "react-router"
 
-
 export const useInterview = () => {
 
     const context = useContext(InterviewContext)
@@ -15,123 +14,99 @@ export const useInterview = () => {
 
     const { loading, setLoading, report, setReport, reports, setReports } = context
 
+    /**
+     * @description Generates a new interview report and handles token-based error catching.
+     */
     const generateReport = async ({ jobDescription, selfDescription, resumeFile }) => {
         setLoading(true)
-        let response = null
         try {
-            response = await generateInterviewReport({ jobDescription, selfDescription, resumeFile })
+            const response = await generateInterviewReport({ jobDescription, selfDescription, resumeFile })
             setReport(response.interviewReport)
+            return response.interviewReport
         } catch (error) {
-            if (error?.response?.data?.message === "NO_TOKENS") {
-                throw new Error("NO_TOKENS")
+            // Check specifically for 403 Forbidden status and the "NO_TOKENS" message[cite: 11]
+            if (error?.response?.status === 403 && error?.response?.data?.message === "NO_TOKENS") {
+                // This specific error string is required to trigger the popup in Home.jsx[cite: 10, 11]
+                throw new Error("NO_TOKENS") 
             }
-            console.log(error)
+            console.error("Report generation error:", error)
+            throw error // Re-throw other errors so the calling component can handle them
         } finally {
             setLoading(false)
         }
-
-        return response.interviewReport
     }
 
     const getReportById = async (interviewId) => {
         setLoading(true)
-        let response = null
         try {
-            response = await getInterviewReportById(interviewId)
+            const response = await getInterviewReportById(interviewId)
             setReport(response.interviewReport)
+            return response.interviewReport
         } catch (error) {
-            console.log(error)
+            console.error("Fetch report by ID error:", error)
         } finally {
             setLoading(false)
         }
-        return response.interviewReport
     }
 
     const getReports = async () => {
         setLoading(true)
-        let response = null
         try {
-            response = await getAllInterviewReports()
+            const response = await getAllInterviewReports()
             setReports(response.interviewReports)
+            return response.interviewReports
         } catch (error) {
-            console.log(error)
+            console.error("Fetch all reports error:", error)
         } finally {
             setLoading(false)
         }
-
-        return response.interviewReports
     }
 
     const getResumePdf = async (interviewReportId) => {
+        setLoading(true)
+        try {
+            const pdfBlob = await generateResumePdf({ interviewReportId })
+            const url = window.URL.createObjectURL(pdfBlob)
+            const link = document.createElement("a")
 
-    setLoading(true)
-
-    try {
-
-        const pdfBlob = await generateResumePdf({ interviewReportId })
-
-        const url = window.URL.createObjectURL(pdfBlob)
-
-        const link = document.createElement("a")
-
-        link.href = url
-        link.download = `resume_${interviewReportId}.pdf`
-
-        document.body.appendChild(link)
-        link.click()
-
-        link.remove()
-
-    } catch (error) {
-
-        console.error("PDF download failed:", error)
-
-    } finally {
-
-        setLoading(false)
-
-    }
+            link.href = url
+            link.download = `resume_${interviewReportId}.pdf`
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+        } catch (error) {
+            console.error("PDF download failed:", error)
+        } finally {
+            setLoading(false)
+        }
     }
 
     const shareInterviewReport = async (interviewReportId) => {
+        try {
+            const pdfBlob = await generateResumePdf({ interviewReportId })
+            const file = new File(
+                [pdfBlob],
+                `interview_report_${interviewReportId}.pdf`,
+                { type: "application/pdf" }
+            )
 
-    try {
-
-        const pdfBlob = await generateResumePdf({ interviewReportId })
-
-        const file = new File(
-            [pdfBlob],
-            `interview_report_${interviewReportId}.pdf`,
-            { type: "application/pdf" }
-        )
-
-        // If browser supports sharing files
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-
-            navigator.share({
-                title: "AI Interview Report",
-                text: "Check out my AI-generated interview preparation report.",
-                files: [file]
-            })
-
-        } else {
-
-            // fallback for desktop
-            const url = window.URL.createObjectURL(pdfBlob)
-
-            const link = document.createElement("a")
-            link.href = url
-            link.download = `interview_report_${interviewReportId}.pdf`
-            link.click()
-
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({
+                    title: "AI Interview Report",
+                    text: "Check out my AI-generated interview preparation report.",
+                    files: [file]
+                })
+            } else {
+                const url = window.URL.createObjectURL(pdfBlob)
+                const link = document.createElement("a")
+                link.href = url
+                link.download = `interview_report_${interviewReportId}.pdf`
+                link.click()
+            }
+        } catch (error) {
+            console.error("Share failed:", error)
         }
-
-    } catch (error) {
-
-        console.error("Share failed:", error)
-
     }
-}
 
     useEffect(() => {
         if (interviewId) {
@@ -139,16 +114,16 @@ export const useInterview = () => {
         } else {
             getReports()
         }
-    }, [ interviewId ])
+    }, [interviewId])
 
-return {
-    loading,
-    report,
-    reports,
-    generateReport,
-    getReportById,
-    getReports,
-    getResumePdf,
-    shareInterviewReport
-}
+    return {
+        loading,
+        report,
+        reports,
+        generateReport,
+        getReportById,
+        getReports,
+        getResumePdf,
+        shareInterviewReport
+    }
 }

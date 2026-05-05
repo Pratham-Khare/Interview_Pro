@@ -159,7 +159,7 @@ async function logoutUserController(req, res) {
     const token = req.cookies.token;
 
     if (token) {
-        await tokenBlacklistModel.create({ token });
+        await tokenBlacklistModel.create({ token })
     }
 
     res.clearCookie("token");

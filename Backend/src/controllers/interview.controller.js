@@ -3,11 +3,9 @@ const { generateInterviewReport, generateResumePdf } = require("../services/ai.s
 const interviewReportModel = require("../models/interviewReport.model")
 const userModel = require("../models/user.model")
 
-
-
-
 /**
  * @description Controller to generate interview report based on user self description, resume and job description.
+ * Token validation is handled by the checkUserTokens middleware.
  */
 async function generateInterViewReportController(req, res) {
 
@@ -34,14 +32,13 @@ async function generateInterViewReportController(req, res) {
     })
 
     /* ----------- TOKEN DEDUCTION ----------- */
-
+    // Deduct token only after successful generation[cite: 2]
     const user = await userModel.findById(req.user.id)
 
-    if (user.tokens > 0) {
+    if (user && user.tokens > 0) {
         user.tokens -= 1
         await user.save()
     }
-
     /* --------------------------------------- */
 
     res.status(201).json({
@@ -108,14 +105,13 @@ async function generateResumePdfController(req, res) {
     const pdfBuffer = await generateResumePdf({ resume, jobDescription, selfDescription })
 
     /* ----------- TOKEN DEDUCTION ----------- */
-
+    // Deduct token for PDF generation services[cite: 2]
     const user = await userModel.findById(req.user.id)
 
-    if (user.tokens > 0) {
+    if (user && user.tokens > 0) {
         user.tokens -= 1
         await user.save()
     }
-
     /* --------------------------------------- */
 
     res.set({
@@ -126,4 +122,9 @@ async function generateResumePdfController(req, res) {
     res.send(pdfBuffer)
 }
 
-module.exports = { generateInterViewReportController, getInterviewReportByIdController, getAllInterviewReportsController, generateResumePdfController }
+module.exports = { 
+    generateInterViewReportController, 
+    getInterviewReportByIdController, 
+    getAllInterviewReportsController, 
+    generateResumePdfController 
+}

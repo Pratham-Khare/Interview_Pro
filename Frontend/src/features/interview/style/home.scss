@@ -8,7 +8,6 @@
     position: relative;
     overflow-x: hidden;
 
-    // Animated background effect
     &::before {
         content: '';
         position: absolute;
@@ -279,6 +278,12 @@
     font-weight: 500;
     color: #ffffff;
     margin: 0;
+
+    // ADDED: Handle long filenames with ellipsis[cite: 1]
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .dropzone__subtitle {
@@ -336,64 +341,6 @@
     margin-top: 12px;
     font-size: 13px;
     color: #9ca3af;
-}
-
-// ============================================
-// FEATURES GRID
-// ============================================
-
-.features-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-bottom: 64px;
-
-    @media (max-width: 968px) {
-        grid-template-columns: 1fr;
-    }
-}
-
-.feature-card {
-    background: rgba(15, 15, 25, 0.4);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 24px;
-    transition: all 0.3s ease;
-
-    &:hover {
-        border-color: rgba(168, 85, 247, 0.3);
-        transform: translateY(-4px);
-    }
-}
-
-.feature-card__icon {
-    width: 48px;
-    height: 48px;
-    background: rgba(168, 85, 247, 0.1);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
-
-    svg {
-        color: #a855f7;
-    }
-}
-
-.feature-card__title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #ffffff;
-    margin: 0 0 8px 0;
-}
-
-.feature-card__description {
-    font-size: 13px;
-    color: #9ca3af;
-    line-height: 1.5;
-    margin: 0;
 }
 
 // ============================================
