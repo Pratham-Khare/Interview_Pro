@@ -41,12 +41,10 @@ An interview preparation and career development platform built using the MERN St
 - Axios
 
 ## Backend
-- Node.js
 - Express.js
 - MongoDB
 - Mongoose
 - JWT Authentication
-- Bcrypt.js
 
 ## Third-Party Services
 - Google Gemini AI
