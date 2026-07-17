@@ -23,7 +23,6 @@ async function getSettingsController(req, res) {
             profilePictureUrl: user.profilePictureUrl || "",
             theme: user.theme || "dark",
             emailAlertsEnabled: user.emailAlertsEnabled,
-            connectedProviders: user.connectedProviders || { google: false, github: false }
         }
     });
 }

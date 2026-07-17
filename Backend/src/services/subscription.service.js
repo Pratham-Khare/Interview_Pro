@@ -25,23 +25,23 @@ async function creditTokensToUser(userId, planName) {
     };
 }
 
-export async function reportFailedPayment(data) {
+// export async function reportFailedPayment(data) {
 
-    try {
+//     try {
 
-        const response = await api.post(
-            "/api/subscription/payment-failed",
-            data
-        )
+//         const response = await api.post(
+//             "/api/subscription/payment-failed",
+//             data
+//         )
 
-        return response.data
+//         return response.data
 
-    } catch (error) {
+//     } catch (error) {
 
-        console.error("Failed to update payment status", error)
+//         console.error("Failed to update payment status", error)
 
-    }
+//     }
 
-}
+// }
 
 export { creditTokensToUser };

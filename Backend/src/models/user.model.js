@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
             unique: [true, "username already taken"],
             required: true
         },
-
+        
         email: {
             type: String,
             unique: [true, "Account already exists with this email address"],
@@ -32,17 +32,6 @@ const userSchema = new mongoose.Schema(
         emailAlertsEnabled: {
             type: Boolean,
             default: true
-        },
-
-        connectedProviders: {
-            google: {
-                type: Boolean,
-                default: false
-            },
-            github: {
-                type: Boolean,
-                default: false
-            }
         },
 
         /* ---------------- SUBSCRIPTION SYSTEM ---------------- */

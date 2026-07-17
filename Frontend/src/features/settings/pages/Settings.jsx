@@ -14,7 +14,6 @@ import { useNavigate } from "react-router"
 
 const SECTIONS = [
     "Account",
-    "Connected Accounts",
     "Appearance",
     "Notifications",
     "Security",
@@ -35,7 +34,6 @@ const Settings = () => {
         profilePictureUrl: "",
         theme: "dark",
         emailAlertsEnabled: true,
-        connectedProviders: { google: false, github: false }
     });
 
     const [sessions, setSessions] = useState([]);
@@ -205,33 +203,7 @@ const Settings = () => {
                         </div>
                     </div>
                 );
-            case "Connected Accounts":
-                return (
-                    <div className="card card-glass">
-                        <div className="card-header">
-                            <h2>Connected Accounts</h2>
-                            <p className="text-secondary">Manage your Google and GitHub connections.</p>
-                        </div>
-                        <div className="card-body d-flex flex-column gap-3">
-                            <div className="d-flex justify-between align-center">
-                                <div>
-                                    <h3>Google</h3>
-                                    <p className="text-secondary">
-                                        {form.connectedProviders.google ? "Connected" : "Not connected"}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="d-flex justify-between align-center">
-                                <div>
-                                    <h3>GitHub</h3>
-                                    <p className="text-secondary">
-                                        {form.connectedProviders.github ? "Connected" : "Not connected"}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
+            
             case "Appearance":
                 return (
                     <div className="card card-glass">

@@ -3,8 +3,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import tokenBlacklistModel from "../models/blacklist.model.js";
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
-
 /**
  * Issue a signed JWT and set it as an HTTP cookie, then return the public user payload.
  *
@@ -35,49 +33,9 @@ res.cookie("token", token, {
         profilePictureUrl: user.profilePictureUrl,
         theme: user.theme,
         emailAlertsEnabled: user.emailAlertsEnabled,
-        connectedProviders: user.connectedProviders
     };
 }
 
-/**
- * Find existing user by email or create a new one for OAuth logins.
- *
- * For social-auth users we generate a random password (they log in via the provider only).
- *
- * @param {{ email: string; usernameHint: string }} payload
- */
-async function findOrCreateOAuthUser({ email, usernameHint }) {
-    let user = await userModel.findOne({ email });
-
-    if (user) {
-        return user;
-    }
-
-    const baseUsername = usernameHint || email.split("@")[0];
-    let username = baseUsername;
-    let suffix = 1;
-
-    // Ensure username is unique
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-        const exists = await userModel.findOne({ username });
-        if (!exists) break;
-        username = `${baseUsername}${suffix++}`;
-    }
-
-    const randomPassword = await bcrypt.hash(
-        `oauth:${Date.now()}:${Math.random().toString(36).slice(2)}`,
-        10
-    );
-
-    user = await userModel.create({
-        username,
-        email,
-        password: randomPassword
-    });
-
-    return user;
-}
 
 /**
  * @name registerUserController
@@ -198,198 +156,9 @@ async function getMeController(req, res) {
     });
 }
 
-/**
- * @route GET /api/auth/google
- * @description Start Google OAuth2 login by redirecting to Google consent screen.
- * @access Public
- */
-async function googleOAuthRedirectController(_req, res) {
-    const params = new URLSearchParams({
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        redirect_uri: `${process.env.BACKEND_URL || "http://localhost:3000"}/api/auth/google/callback`,
-        response_type: "code",
-        scope: "openid email profile",
-        access_type: "offline",
-        prompt: "consent"
-    });
-
-    res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
-}
-
-/**
- * @route GET /api/auth/google/callback
- * @description Handle Google OAuth2 callback, create/find user, set JWT cookie and redirect to frontend.
- * @access Public
- */
-async function googleOAuthCallbackController(req, res) {
-    const { code } = req.query;
-
-    if (!code) {
-        return res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);
-    }
-
-    try {
-        const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({
-                code,
-                client_id: process.env.GOOGLE_CLIENT_ID,
-                client_secret: process.env.GOOGLE_CLIENT_SECRET,
-                redirect_uri: `${process.env.BACKEND_URL || "http://localhost:3000"}/api/auth/google/callback`,
-                grant_type: "authorization_code"
-            })
-        });
-
-        if (!tokenResponse.ok) {
-            return res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);
-        }
-
-        const tokenJson = await tokenResponse.json();
-
-        const userInfoResponse = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-            headers: { Authorization: `Bearer ${tokenJson.access_token}` }
-        });
-
-        if (!userInfoResponse.ok) {
-            return res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);
-        }
-
-        const profile = await userInfoResponse.json();
-
-        if (!profile.email) {
-            return res.redirect(`${FRONTEND_URL}/login?error=google_no_email`);
-        }
-
-        let user = await findOrCreateOAuthUser({
-            email: profile.email,
-            usernameHint: profile.given_name || profile.name || profile.email.split("@")[0]
-        });
-        if (!user.connectedProviders.google) {
-            user.connectedProviders.google = true;
-            user = await user.save();
-        }
-
-        signAndAttachToken(res, user);
-
-        return res.redirect(FRONTEND_URL);
-    } catch (_err) {
-        return res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);
-    }
-}
-
-/**
- * @route GET /api/auth/github
- * @description Start GitHub OAuth2 login by redirecting to GitHub.
- * @access Public
- */
-async function githubOAuthRedirectController(_req, res) {
-    const params = new URLSearchParams({
-        client_id: process.env.GITHUB_CLIENT_ID,
-        scope: "read:user user:email"
-        // We intentionally do NOT send redirect_uri here and instead rely on
-        // the callback URL configured in the GitHub OAuth app to avoid
-        // mismatch issues that can cause GitHub 404 pages.
-    });
-
-    res.redirect(`https://github.com/login/oauth/authorize?${params.toString()}`);
-}
-
-/**
- * @route GET /api/auth/github/callback
- * @description Handle GitHub OAuth2 callback, create/find user, set JWT cookie and redirect to frontend.
- * @access Public
- */
-async function githubOAuthCallbackController(req, res) {
-    const { code } = req.query;
-
-    if (!code) {
-        return res.redirect(`${FRONTEND_URL}/login?error=github_auth_failed`);
-    }
-
-    try {
-        const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                client_id: process.env.GITHUB_CLIENT_ID,
-                client_secret: process.env.GITHUB_CLIENT_SECRET,
-                code
-            })
-        });
-
-        if (!tokenResponse.ok) {
-            return res.redirect(`${FRONTEND_URL}/login?error=github_auth_failed`);
-        }
-
-        const tokenJson = await tokenResponse.json();
-
-        const userInfoResponse = await fetch("https://api.github.com/user", {
-            headers: {
-                Authorization: `Bearer ${tokenJson.access_token}`,
-                "User-Agent": "interview-ai-app"
-            }
-        });
-
-        if (!userInfoResponse.ok) {
-            return res.redirect(`${FRONTEND_URL}/login?error=github_auth_failed`);
-        }
-
-        const profile = await userInfoResponse.json();
-
-        // GitHub may not expose email on the main profile; fetch from /user/emails as a fallback.
-        let email = profile.email;
-
-        if (!email) {
-            const emailsResponse = await fetch("https://api.github.com/user/emails", {
-                headers: {
-                    Authorization: `Bearer ${tokenJson.access_token}`,
-                    "User-Agent": "interview-ai-app",
-                    Accept: "application/vnd.github+json"
-                }
-            });
-
-            if (emailsResponse.ok) {
-                const emails = await emailsResponse.json();
-                const primary = emails.find((e) => e.primary && e.verified) ||
-                    emails.find((e) => e.verified) ||
-                    emails[0];
-
-                email = primary?.email;
-            }
-        }
-
-        if (!email) {
-            return res.redirect(`${FRONTEND_URL}/login?error=github_no_email`);
-        }
-
-        let user = await findOrCreateOAuthUser({
-            email,
-            usernameHint: profile.login || email.split("@")[0]
-        });
-        if (!user.connectedProviders.github) {
-            user.connectedProviders.github = true;
-            user = await user.save();
-        }
-
-        signAndAttachToken(res, user);
-
-        return res.redirect(FRONTEND_URL);
-    } catch (_err) {
-        return res.redirect(`${FRONTEND_URL}/login?error=github_auth_failed`);
-    }
-}
-
 export {
     registerUserController,
     loginUserController,
     logoutUserController,
-    getMeController,
-    googleOAuthRedirectController,
-    googleOAuthCallbackController,
-    githubOAuthRedirectController,
-    githubOAuthCallbackController
-};
+    getMeController
+}
