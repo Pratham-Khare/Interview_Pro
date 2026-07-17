@@ -165,7 +165,7 @@ Update Subscription
 
 ```bash
 git clone <repository-url>
-cd interview-pro
+cd interviewForge
 ```
 
 ## Install Frontend Dependencies
