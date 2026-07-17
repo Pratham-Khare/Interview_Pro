@@ -309,7 +309,7 @@ const Home = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
                         </svg>
-                        InterviewPro
+                        InterviewForge
                     </div>
                     <div className='footer-links'>
                         <a href='#'>Privacy Policy</a>
@@ -317,7 +317,7 @@ const Home = () => {
                         <a href='#'>Help Center</a>
                     </div>
                     <div className='footer-copyright'>
-                        © 2024 InterviewPro. All rights reserved.
+                        © 2026 InterviewForge. All rights reserved.
                     </div>
                 </footer>
 

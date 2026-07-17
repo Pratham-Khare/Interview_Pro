@@ -1,5 +1,11 @@
 import userModel from "../models/user.model.js";
 
+/**
+ * @name checkUserTokens
+ * @description Validates that the authenticated user has sufficient tokens
+ *              before allowing access to protected features.
+ * @access Private
+ */
 async function checkUserTokens(req, res, next) {
     try {
         const userId = req.user.id;

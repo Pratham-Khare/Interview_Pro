@@ -1,6 +1,12 @@
 import jwt from "jsonwebtoken";
 import tokenBlacklistModel from "../models/blacklist.model.js";
 
+/**
+ * @name authUser
+ * @description Authenticates the current user by validating the JWT stored in cookies
+ *              and blocks requests using blacklisted tokens.
+ * @access Private
+ */
 async function authUser(req, res, next) {
     const token = req.cookies.token;
 

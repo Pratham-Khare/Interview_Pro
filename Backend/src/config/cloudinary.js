@@ -1,5 +1,10 @@
 import { v2 as cloudinary } from "cloudinary";
 
+/**
+ * @name cloudinary
+ * @description Configures and exports the Cloudinary client using
+ *              environment variables.
+ */
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,

@@ -1,6 +1,6 @@
-# 🚀 AI Interview Pro
+# 🚀InterviewForge
 
-An AI-powered interview preparation and career development platform built using the MERN Stack. The platform helps users generate AI-powered interview reports from their resumes, manage subscriptions, purchase tokens, and improve interview readiness through intelligent feedback.
+An Interview preparation and career development platform built using the MERN Stack. The platform helps users generate AI-powered interview reports from their resumes, manage subscriptions, purchase tokens, and improve interview readiness through intelligent feedback.
 
 ---
 
@@ -11,7 +11,6 @@ An AI-powered interview preparation and career development platform built using 
 - User Login
 - JWT Authentication
 - Protected Routes
-- Secure Cookie-Based Sessions
 
 ## 🤖 AI Interview Analysis
 - Resume Upload
@@ -20,7 +19,6 @@ An AI-powered interview preparation and career development platform built using 
 - Interview Report Storage
 
 ## 📄 Resume Processing
-- PDF Resume Parsing
 - Resume Analysis
 - Report Generation
 
@@ -32,9 +30,7 @@ An AI-powered interview preparation and career development platform built using 
 - Automatic Token Updates
 
 ## ⚙️ User Settings
-- Theme Preferences
 - Account Settings
-- Notification Preferences
 
 ---
 
@@ -44,8 +40,6 @@ An AI-powered interview preparation and career development platform built using 
 - React.js
 - React Router
 - Axios
-- React Hot Toast
-- SCSS
 
 ## Backend
 - Node.js
@@ -53,7 +47,6 @@ An AI-powered interview preparation and career development platform built using 
 - MongoDB
 - Mongoose
 - JWT Authentication
-- Bcrypt.js
 
 ## Third-Party Services
 - Google Gemini AI

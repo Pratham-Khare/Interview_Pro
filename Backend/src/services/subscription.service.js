@@ -1,6 +1,11 @@
 import userModel from "../models/user.model.js";
 import PLANS from "../config/plans.js";
 
+/**
+ * @name creditTokensToUser
+ * @description Credits subscription tokens to the specified user and updates
+ *              the user's active subscription plan.
+ */
 async function creditTokensToUser(userId, planName) {
     const plan = PLANS[planName];
 

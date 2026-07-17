@@ -62,6 +62,12 @@ const interviewReportSchema = z.object({
     title: z.string()
 });
 
+
+/**
+ * @name generateInterviewReport
+ * @description Generates a structured interview report using the candidate's
+ *              resume, self-description, and job description.
+ */
 async function generateInterviewReport({
     resume,
     selfDescription,
@@ -87,6 +93,11 @@ Job Description: ${jobDescription}
     return JSON.parse(response.text);
 }
 
+
+/**
+ * @name generatePdfFromHtml
+ * @description Converts HTML content into a PDF document using Puppeteer.
+ */
 async function generatePdfFromHtml(htmlContent) {
     const browser = await puppeteer.launch({
     headless: true,
@@ -117,6 +128,11 @@ async function generatePdfFromHtml(htmlContent) {
     return pdfBuffer;
 }
 
+/**
+ * @name generateResumePdf
+ * @description Generates a resume PDF using the candidate's resume,
+ *              self-description, and job description.
+ */
 async function generateResumePdf({
     resume,
     selfDescription,

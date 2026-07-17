@@ -5,6 +5,11 @@ import razorpay from "../utils/razorpay.js";
 import crypto from "crypto";
 import paymentModel from "../models/payment.model.js";
 
+/**
+ * @name getPlansController
+ * @description Returns all available subscription plans.
+ * @access Public
+ */
 async function getPlansController(req, res) {
 
     res.status(200).json({
@@ -13,6 +18,11 @@ async function getPlansController(req, res) {
 
 }
 
+/**
+ * @name getUserTokensController
+ * @description Returns the authenticated user's available tokens and active subscription plan.
+ * @access Private
+ */
 async function getUserTokensController(req, res) {
 
     const user = await userModel.findById(req.user.id).select("tokens subscriptionPlan")
@@ -49,6 +59,11 @@ async function purchasePlanController(req, res) {
 
 }
 
+/**
+ * @name createOrderController
+ * @description Creates a Razorpay order and stores the initial payment record.
+ * @access Private
+ */
 async function createOrderController(req, res) {
 
     try {
@@ -96,6 +111,13 @@ async function createOrderController(req, res) {
 
 }
 
+
+/**
+ * @name verifyPaymentController
+ * @description Verifies the Razorpay payment signature, updates the payment status,
+ *              and credits subscription tokens after successful verification.
+ * @access Private
+ */
 async function verifyPaymentController(req, res) {
 
     try {
@@ -189,6 +211,12 @@ async function verifyPaymentController(req, res) {
 
 }
 
+
+/**
+ * @name paymentFailedController
+ * @description Updates the payment record when a payment fails or is cancelled.
+ * @access Private
+ */
 async function paymentFailedController(req, res) {
 
     try {

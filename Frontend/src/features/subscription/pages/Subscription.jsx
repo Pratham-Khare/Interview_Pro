@@ -44,7 +44,7 @@ const Subscription = () => {
                 amount: order.amount,
                 currency: order.currency,
 
-                name: "InterviewPro",
+                name: "InterviewForge",
                 description: "Subscription Plan",
 
                 order_id: order.id,
